@@ -33,6 +33,7 @@ async function run() {
     const assetCollection = db.collection('assets');
     const requestCollection = db.collection('requests');
     const employeeAffiliationCollection = db.collection('employeeAffiliations');
+    const packageCollection = db.collection('packages');
     
     
     app.get('/assets', async (req,res) => {
