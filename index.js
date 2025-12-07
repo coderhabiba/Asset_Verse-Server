@@ -3,6 +3,8 @@ const cors = require('cors');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
 const port = process.env.PORT || 3000;
+import dotenv from 'dotenv';
+dotenv.config();
 
 // middleware
 app.use(express.json())
@@ -27,13 +29,19 @@ async function run() {
     
     // database create and create collections
     const db = client.db('asset_verse_db');
-    const assetCollection = db.collection('test_collection');
+    const userCollection = db.collection('users');
+    const assetCollection = db.collection('assets');
+    const requestCollection = db.collection('requests');
+    const employeeAffiliationCollection = db.collection('employeeAffiliations');
+    const packageCollection = db.collection('packages');
+    const paymentCollection = db.collection('payments');
     
     app.get('/assets', async (req,res) => {
       
     })
 
     app.post('/assets', async(req,res) => {
+      const asset = req.body;
       
     })
 
