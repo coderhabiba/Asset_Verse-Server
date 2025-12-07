@@ -42,7 +42,8 @@ async function run() {
 
     app.post('/assets', async(req,res) => {
       const asset = req.body;
-      const result = assetCollection.insertOne(asset)
+      const result = await assetCollection.insertOne(asset);
+      res.send(result);
     })
 
     await client.db('admin').command({ ping: 1 });
