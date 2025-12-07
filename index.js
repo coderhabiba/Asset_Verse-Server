@@ -31,6 +31,7 @@ async function run() {
     const db = client.db('asset_verse_db');
     const userCollection = db.collection('users');
     const assetCollection = db.collection('assets');
+    const requestCollection = db.collection('requests');
     
     
     app.get('/assets', async (req,res) => {
