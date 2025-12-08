@@ -1,4 +1,3 @@
-// server.js
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
@@ -362,6 +361,12 @@ async function run() {
 
       res.json({ message: 'Asset returned successfully' });
     });
+
+    // packages
+    app.get('/packages', async(req, res) => {
+      const result = await packageCol.find().toArray();
+      res.send(result);
+    })
 
     // --------------------------
     // ROOT
