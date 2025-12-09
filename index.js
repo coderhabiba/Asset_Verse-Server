@@ -368,11 +368,42 @@ async function run() {
       res.send(result);
     })
 
-    // --------------------------
-    // ROOT
-    // --------------------------
+    app.post('/packages', async (req, res) => {
+      try {
+        const { name, employeeLimit, price, features } = req.body;
+
+        if (!name || !employeeLimit || !price || !features) {
+          return res.status(400).json({ message: 'All fields are required' });
+        }
+
+        const newPackage = {
+          name,
+          employeeLimit,
+          price,
+          features, // expects an array
+          createdAt: new Date(),
+        };
+
+        const result = await packageCol.insertOne(newPackage);
+        res
+          .status(201)
+          .json({
+            message: 'Package added',
+            insertedId: result.insertedId,
+            package: newPackage,
+          });
+      } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+      }
+    });
+
+
+
+    
+    // root
     app.get('/', (req, res) =>
-      res.send('AssetVerse Backend Running (JWT & Role-Based)')
+      res.send('AssetVerse backend running')
     );
 
     await client.db('admin').command({ ping: 1 });
