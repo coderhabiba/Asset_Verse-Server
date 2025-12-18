@@ -43,8 +43,6 @@ async function run() {
     const payments = db.collection('payments');
     const packages = db.collection('packages');
 
-    console.log('MongoDB connected successfully!');
-
     // JWT verification middleware
     const verifyToken = (req, res, next) => {
       const authHeader = req.headers.authorization;
