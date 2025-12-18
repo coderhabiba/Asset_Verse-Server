@@ -12,7 +12,6 @@ const port = process.env.PORT || 5000;
 app.use(
   cors({
     origin: ['http://localhost:5173', 'https://asset-verse.netlify.app/'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     credentials: true,
   })
 );
