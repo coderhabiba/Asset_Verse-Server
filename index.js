@@ -11,7 +11,7 @@ const port = process.env.PORT || 5000;
 // middleware
 app.use(
   cors({
-    origin: ['http://localhost:5173', 'https://asset-verse-server-sigma.vercel.app', 'https://asset-verse.netlify.app'],
+    origin: ['http://localhost:5173', 'https://asset-verse.netlify.app'],
     credentials: true,
   })
 );
@@ -31,7 +31,7 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     const db = client.db('asset_verse_db');
     const users = db.collection('users');
@@ -53,7 +53,7 @@ async function run() {
       const token = authHeader.split(' ')[1];
       jwt.verify(
         token,
-        process.env.JWT_SECRET || 'secretkey',
+        process.env.JWT_SECRET,
         (err, decoded) => {
           if (err) {
             return res
