@@ -1306,3 +1306,5 @@ run().catch(console.dir);
 app.listen(port, () => {
   console.log(`Asset Server listening on port ${port}`);
 });
+
+module.exports = app;
