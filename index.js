@@ -51,19 +51,15 @@ async function run() {
           .send({ message: 'Unauthorized access: No token provided' });
       }
       const token = authHeader.split(' ')[1];
-      jwt.verify(
-        token,
-        process.env.JWT_SECRET,
-        (err, decoded) => {
-          if (err) {
-            return res
-              .status(401)
-              .send({ message: 'Unauthorized access: Invalid token' });
-          }
-          req.user = decoded;
-          next();
+      jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+        if (err) {
+          return res
+            .status(401)
+            .send({ message: 'Unauthorized access: Invalid token' });
         }
-      );
+        req.user = decoded;
+        next();
+      });
     };
 
     // role verification middleware
@@ -76,12 +72,61 @@ async function run() {
       next();
     };
 
+    const verifyCEO = async (req, res, next) => {
+      const user = req.user;
+      if (user?.role !== 'ceo') {
+        return res.status(403).json({ message: 'Forbidden: CEO Access Only' });
+      }
+      next();
+    };
+
     /*=============
       user routes
     ===============*/
 
+    // 
+    app.get('/ceo/companies', verifyToken, verifyCEO, async (req, res) => {
+      const allHRs = await users.find({ role: 'hr' }).toArray();
+      res.json(allHRs);
+    });
+
+    // CEO Dashboard Stats
+   app.get('/ceo/stats', verifyToken, verifyCEO, async (req, res) => {
+     try {
+       const totalCompanies = await users.countDocuments({ role: 'hr' });
+       const totalEmployees = await users.countDocuments({ role: 'employee' });
+
+       //
+       const revenueData = await payments
+         .aggregate([
+           {
+             $group: {
+               _id: null,
+               total: { $sum: '$amount' },
+             },
+           },
+         ])
+         .toArray();
+
+       // 
+       const totalRevenue = revenueData.length > 0 ? revenueData[0].total : 0;
+
+       res.json({
+         totalCompanies,
+         totalEmployees,
+         totalRevenue,
+         currency: 'usd', 
+         platformStatus: 'Healthy',
+         lastUpdated: new Date(),
+       });
+     } catch (err) {
+       console.error('CEO Stats Error:', err);
+       res.status(500).json({ message: 'Error fetching CEO stats' });
+     }
+   });
+
     // register HR
-    app.post('/register-hr',  async (req, res) => {
+    app.post('/register-hr', async (req, res) => {
       try {
         const { name, companyName, companyLogo, email, password, date } =
           req.body;
@@ -122,10 +167,7 @@ async function run() {
         };
 
         const result = await users.insertOne(newHR);
-        const token = jwt.sign(
-          { email: email },
-          process.env.JWT_SECRET
-        );
+        const token = jwt.sign({ email: email }, process.env.JWT_SECRET);
         const safe = { ...newHR };
         delete safe.password;
         safe._id = result.insertedId.toString();
@@ -140,8 +182,7 @@ async function run() {
     // register employee
     app.post('/register-employee', async (req, res) => {
       try {
-        const { name, email, password, date, profileImage, hrEmail } =
-          req.body;
+        const { name, email, password, date, profileImage, hrEmail } = req.body;
         if (!name || !email || !password) {
           return res
             .status(400)
@@ -364,7 +405,7 @@ async function run() {
     app.get('/assets', verifyToken, verifyHR, async (req, res) => {
       try {
         const hrEmail = req.user.email;
-        let { page = 1, limit = 10, search = '' } = req.query; 
+        let { page = 1, limit = 10, search = '' } = req.query;
 
         page = parseInt(page);
         limit = parseInt(limit);
@@ -692,7 +733,7 @@ async function run() {
             { _id: new ObjectId(requestId) },
             {
               $set: {
-                requestStatus: 'approved', 
+                requestStatus: 'approved',
                 approvalDate: new Date(),
                 processedBy: hrEmail,
               },
